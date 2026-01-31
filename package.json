@@ -1,0 +1,20 @@
+{
+  "name": "deutschvideofactory",
+  "version": "1.0.0",
+  "main": "main.cjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "electron": "^40.1.0"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "canvas": "^3.2.1"
+  }
+}

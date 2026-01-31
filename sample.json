@@ -1,0 +1,22 @@
+{
+  "dialogue": [
+    {
+      "speaker": "A",
+      "de": "Guten Tag!",
+      "tr": "Günaydın!",
+      "trPron": "Gü-nay-dın",
+      "keywords": [
+        { "de": "Tag", "tr": "gün" }
+      ]
+    },
+    {
+      "speaker": "B",
+      "de": "Wie geht es dir?",
+      "tr": "Nasılsın?",
+      "trPron": "Vi get es dir",
+      "keywords": [
+        { "de": "gehen", "tr": "gitmek" }
+      ]
+    }
+  ]
+}

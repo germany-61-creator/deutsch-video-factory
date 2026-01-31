@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deutsch Video Factory</title>
+</head>
+<body style="font-family: Arial; padding: 20px">
+  <h1>Deutsch Video Factory</h1>
+
+  <div style="display:flex; gap:10px; margin: 12px 0;">
+    <button id="btn">sample.json yükle</button>
+    <button id="sceneBtn">Sahne Oluştur (PNG)</button>
+  </div>
+
+  <pre id="out" style="margin-top:16px; padding:12px; border:1px solid #ccc; white-space:pre-wrap;"></pre>
+
+  <script>
+    const out = document.getElementById('out');
+
+    document.getElementById('btn').addEventListener('click', async () => {
+      out.textContent = 'Yükleniyor...';
+      try {
+        const data = await window.api.loadSample();
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        out.textContent = 'HATA: ' + (e && e.message ? e.message : String(e));
+      }
+    });
+
+    document.getElementById('sceneBtn').addEventListener('click', async () => {
+      out.textContent = 'Sahne üretiliyor...';
+      try {
+        const res = await window.api.generateScene();
+        out.textContent = 'OK: ' + res.file;
+        alert('Sahne oluşturuldu:\n' + res.file);
+      } catch (e) {
+        out.textContent = 'HATA: ' + (e && e.message ? e.message : String(e));
+      }
+    });
+  </script>
+</body>
+</html>

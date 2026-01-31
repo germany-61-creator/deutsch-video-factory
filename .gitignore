@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+exports/
+logs/
+*.log
+electron_log.txt
+.DS_Store
+Thumbs.db
