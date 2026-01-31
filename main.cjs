@@ -1,68 +1,42 @@
-const fs = require('fs');
-const path = require('path');
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain } = require("electron");
+const path = require("path");
 
-const { getRootDirs } = require('./app/core/paths/paths.cjs');
-const { createLogger } = require('./app/core/log/logger.cjs');
-const { JobManager } = require('./app/core/jobs/jobManager.cjs');
+const { createLogger } = require("./app/main/logger.cjs");
+const { createSettingsStore } = require("./app/main/settingsStore.cjs");
 
+let mainWindow;
+let settingsStore;
 let logger;
-let jobs;
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1100,
-    height: 700,
+    height: 750,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false
     }
   });
 
-  win.loadFile('index.html');
+  mainWindow.loadFile("index.html");
 }
 
 app.whenReady().then(() => {
-  const dirs = getRootDirs(fs);
-  logger = createLogger(dirs.logsDir);
-  jobs = new JobManager(logger);
-  logger.info('APP_READY', { userData: dirs.userData, exportsDir: dirs.exportsDir });
+  const userData = app.getPath("userData");
+
+  logger = createLogger(userData);
+  settingsStore = createSettingsStore(userData, logger);
 
   createWindow();
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  ipcMain.handle("settings:get", () => settingsStore.load());
+  ipcMain.handle("settings:set", (_, data) => settingsStore.save(data));
+  ipcMain.handle("settings:applyPreset", (_, name) =>
+    settingsStore.applyPreset(name)
+  );
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-// --- IPC: load sample.json ---
-ipcMain.handle('load-sample', async () => {
-  const data = fs.readFileSync(path.join(__dirname, 'sample.json'), 'utf8');
-  return JSON.parse(data);
-});
-
-// --- IPC: generate first scene PNG ---
-ipcMain.handle('generate-scene', async () => {
-  // 1) scene output folder
-  const scenesDir = path.join(__dirname, 'scenes');
-  if (!fs.existsSync(scenesDir)) fs.mkdirSync(scenesDir, { recursive: true });
-
-  // 2) read sample.json
-  const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'sample.json'), 'utf8'));
-  const scene = data.dialogue && data.dialogue[0] ? data.dialogue[0] : null;
-  if (!scene) throw new Error('sample.json içinde dialogue[0] bulunamadı');
-
-  // 3) generate image
-  const { generateScenePng } = require('./app/core/sceneGenerator.cjs');
-  const outPath = path.join(scenesDir, 'scene1.png');
-  generateScenePng(scene, outPath);
-
-  logger && logger.info('SCENE_GENERATED', { file: outPath });
-
-  return { ok: true, file: outPath };
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
 });

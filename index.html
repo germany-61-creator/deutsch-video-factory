@@ -1,43 +1,73 @@
 <!doctype html>
-<html lang="tr">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
   <title>Deutsch Video Factory</title>
 </head>
-<body style="font-family: Arial; padding: 20px">
-  <h1>Deutsch Video Factory</h1>
+<body style="font-family:Arial;padding:20px">
 
-  <div style="display:flex; gap:10px; margin: 12px 0;">
-    <button id="btn">sample.json yükle</button>
-    <button id="sceneBtn">Sahne Oluştur (PNG)</button>
-  </div>
+<h2>Video Settings</h2>
 
-  <pre id="out" style="margin-top:16px; padding:12px; border:1px solid #ccc; white-space:pre-wrap;"></pre>
+<label>Preset:
+  <select id="preset">
+    <option value="shorts">Shorts</option>
+    <option value="lesson">Lesson</option>
+    <option value="listening">Listening</option>
+  </select>
+</label>
 
-  <script>
-    const out = document.getElementById('out');
+<hr>
 
-    document.getElementById('btn').addEventListener('click', async () => {
-      out.textContent = 'Yükleniyor...';
-      try {
-        const data = await window.api.loadSample();
-        out.textContent = JSON.stringify(data, null, 2);
-      } catch (e) {
-        out.textContent = 'HATA: ' + (e && e.message ? e.message : String(e));
-      }
-    });
+<label><input type="checkbox" id="showGerman"> German</label><br>
+<label><input type="checkbox" id="showTurkish"> Turkish</label><br>
+<label><input type="checkbox" id="showPronunciation"> Pronunciation</label><br>
+<label><input type="checkbox" id="showWords"> Words</label><br>
+<label><input type="checkbox" id="showSpeaker"> Speaker</label><br>
 
-    document.getElementById('sceneBtn').addEventListener('click', async () => {
-      out.textContent = 'Sahne üretiliyor...';
-      try {
-        const res = await window.api.generateScene();
-        out.textContent = 'OK: ' + res.file;
-        alert('Sahne oluşturuldu:\n' + res.file);
-      } catch (e) {
-        out.textContent = 'HATA: ' + (e && e.message ? e.message : String(e));
-      }
-    });
-  </script>
+<br>
+<button id="load">Load</button>
+<button id="save">Save</button>
+<button id="presetBtn">Apply Preset</button>
+
+<pre id="out"></pre>
+
+<script>
+const $ = id => document.getElementById(id);
+
+async function load() {
+  const s = await window.settingsAPI.get();
+  $("preset").value = s.preset;
+  $("showGerman").checked = s.showGerman;
+  $("showTurkish").checked = s.showTurkish;
+  $("showPronunciation").checked = s.showPronunciation;
+  $("showWords").checked = s.showWords;
+  $("showSpeaker").checked = s.showSpeaker;
+  $("out").textContent = JSON.stringify(s, null, 2);
+}
+
+async function save() {
+  const data = {
+    preset: $("preset").value,
+    showGerman: $("showGerman").checked,
+    showTurkish: $("showTurkish").checked,
+    showPronunciation: $("showPronunciation").checked,
+    showWords: $("showWords").checked,
+    showSpeaker: $("showSpeaker").checked
+  };
+  const res = await window.settingsAPI.set(data);
+  $("out").textContent = JSON.stringify(res, null, 2);
+}
+
+async function preset() {
+  const res = await window.settingsAPI.applyPreset($("preset").value);
+  $("out").textContent = JSON.stringify(res, null, 2);
+}
+
+$("load").onclick = load;
+$("save").onclick = save;
+$("presetBtn").onclick = preset;
+
+load();
+</script>
 </body>
 </html>
